@@ -67,52 +67,53 @@ export default function ImageCursorTrail({
   const handleOnMove = (e: React.MouseEvent) => {
     const clientX = e.clientX;
     const clientY = e.clientY;
-  
+
     if (distanceFromLast(clientX, clientY) > window.innerWidth / distance) {
       const lead =
         refs.current[globalIndexRef.current % refs.current.length].current;
-  
+
       const tailIndex =
         (globalIndexRef.current - maxNumberOfImages + refs.current.length) %
         refs.current.length;
       const tail = refs.current[tailIndex]?.current;
-  
+
       if (lead) activate(lead, clientX, clientY);
       if (tail) deactivate(tail);
-  
+
       globalIndexRef.current++;
     }
   };
-  
 
   return (
     <section
-    onMouseMove={handleOnMove}
-    ref={containerRef}
-    className={cn(
-      "relative grid h-[600px] w-full place-content-center overflow-hidden rounded-lg",
-      className
-    )}
-  >
-    {items.map((item, index) => (
-      <div
-        key={index}
-        ref={refs.current[index]}
-        data-status="inactive"
-        className={cn(
-          "absolute -translate-x-1/2 -translate-y-1/2 scale-0 rounded-3xl overflow-hidden transition-transform duration-300 opacity-0 data-[status='active']:scale-100 data-[status='active']:opacity-100 data-[status='active']:duration-500",
-          imgClass
-        )}
-      >
-        <img
-          src={item}
-          alt={`image-${index}`}
-          className="object-cover w-full h-full"
-        />
-      </div>
-    ))}
+      onMouseMove={handleOnMove}
+      ref={containerRef}
+      className={cn(
+        "relative grid h-[600px] w-full place-content-center overflow-hidden rounded-lg",
+        className
+      )}
+    >
+      {items.map((item, index) => (
+        <div
+          key={index}
+          ref={refs.current[index]}
+          data-status="inactive"
+          className={cn(
+            "absolute -translate-x-1/2 -translate-y-1/2 scale-0 rounded-3xl overflow-hidden transition-transform duration-300 opacity-0 data-[status='active']:scale-100 data-[status='active']:opacity-100 data-[status='active']:duration-500",
+            imgClass
+          )}
+        >
+          <Image
+            src={item}
+            alt={`image-${index}`}
+            className="object-cover w-full h-full"
+            width={160}
+            height={192}
+          />
+        </div>
+      ))}
 
-    {children}
-  </section>
+      {children}
+    </section>
   );
 }
