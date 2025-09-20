@@ -55,30 +55,8 @@ export default function Hero() {
 
     </section>
     
-      <div className="absolute left-0 top-80 hidden lg:block">
-  <img
-    alt="Background SVG"
-    loading="lazy"
-    width="100"
-    height="100"
-    decoding="async"
-    className="dark:opacity-10"
-    style={{ color: 'transparent' }}
-    src="https://skiper-ui.com/bg/bg_1.svg"
-  />
-</div>
-      <div className="absolute right-0 top-80 hidden lg:block">
-  <img
-    alt="Background SVG"
-    loading="lazy"
-    width="100"
-    height="100"
-    decoding="async"
-    className="dark:opacity-10"
-    style={{ color: 'transparent' }}
-    src="https://skiper-ui.com/bg/bg_1.svg"
-  />
-</div>
+
+
     </>
   );
 }

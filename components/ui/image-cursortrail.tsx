@@ -4,7 +4,7 @@ import { createRef, useRef } from "react"
 import { cn } from "@/lib/utils"
 
 interface ImageMouseTrailProps {
-  items: string[] // Assuming ImageItem is just a string (image URL)
+  items: string[]
   children?: React.ReactNode
   className?: string
   imgClass?: string
@@ -22,17 +22,20 @@ export default function ImageCursorTrail({
   distance = 20,
   fadeAnimation = false,
 }: ImageMouseTrailProps) {
-  const containerRef = useRef(null)
+  const containerRef = useRef<HTMLDivElement | null>(null)
   const refs = useRef(items.map(() => createRef<HTMLImageElement>()))
   const currentZIndexRef = useRef(1)
 
   let globalIndex = 0
   let last = { x: 0, y: 0 }
 
-  const activate = (image, x, y) => {
-    const containerRect = containerRef.current?.getBoundingClientRect()
+  const activate = (image: HTMLImageElement, x: number, y: number) => {
+    if (!containerRef.current) return
+
+    const containerRect = containerRef.current.getBoundingClientRect()
     const relativeX = x - containerRect.left
     const relativeY = y - containerRect.top
+
     image.style.left = `${relativeX}px`
     image.style.top = `${relativeY}px`
 
@@ -54,15 +57,15 @@ export default function ImageCursorTrail({
     last = { x, y }
   }
 
-  const deactivate = (image) => {
+  const deactivate = (image: HTMLImageElement) => {
     image.dataset.status = "inactive"
   }
 
-  const distanceFromLast = (x, y) => {
+  const distanceFromLast = (x: number, y: number) => {
     return Math.hypot(x - last.x, y - last.y)
   }
 
-  const handleOnMove = (e) => {
+  const handleOnMove = (e: React.MouseEvent | React.Touch) => {
     if (distanceFromLast(e.clientX, e.clientY) > window.innerWidth / distance) {
       const lead = refs.current[globalIndex % refs.current.length].current
       const tail =
@@ -77,7 +80,7 @@ export default function ImageCursorTrail({
 
   return (
     <section
-      onMouseMove={handleOnMove}
+      onMouseMove={(e) => handleOnMove(e)}
       onTouchMove={(e) => handleOnMove(e.touches[0])}
       ref={containerRef}
       className={cn(
@@ -86,7 +89,6 @@ export default function ImageCursorTrail({
       )}
     >
       {items.map((item, index) => (
-        // Removed unnecessary fragment, key is now correctly applied to the <img />
         <img
           key={index}
           className={cn(
