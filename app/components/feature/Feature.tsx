@@ -50,7 +50,7 @@ const Feature = () => {
         <div className="rounded-2xl bg-[#1C1C1C] p-5">
           <h3 className="text-white font-semibold">Free SEO Improvement Tool</h3>
           <p className="text-gray-400 text-sm mt-2">
-            Quickly evaluate your website's SEO performance for free. AI improvements + Open graph preview.
+            Quickly evaluate your website&apos;s SEO performance for free. AI improvements + Open graph preview.
           </p>
         </div>
 

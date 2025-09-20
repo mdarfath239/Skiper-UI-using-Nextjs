@@ -1,16 +1,17 @@
-"use client"
+"use client";
 
-import { createRef, useRef } from "react"
-import { cn } from "@/lib/utils"
+import { createRef, useRef } from "react";
+import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 interface ImageMouseTrailProps {
-  items: string[]
-  children?: React.ReactNode
-  className?: string
-  imgClass?: string
-  distance?: number
-  maxNumberOfImages?: number
-  fadeAnimation?: boolean
+  items: string[];
+  children?: React.ReactNode;
+  className?: string;
+  imgClass?: string;
+  distance?: number;
+  maxNumberOfImages?: number;
+  fadeAnimation?: boolean;
 }
 
 export default function ImageCursorTrail({
@@ -22,88 +23,96 @@ export default function ImageCursorTrail({
   distance = 20,
   fadeAnimation = false,
 }: ImageMouseTrailProps) {
-  const containerRef = useRef<HTMLDivElement | null>(null)
-  const refs = useRef(items.map(() => createRef<HTMLImageElement>()))
-  const currentZIndexRef = useRef(1)
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const refs = useRef(items.map(() => createRef<HTMLDivElement>()));
+  const currentZIndexRef = useRef(1);
+  const globalIndexRef = useRef(0);
+  const lastRef = useRef({ x: 0, y: 0 });
 
-  let globalIndex = 0
-  let last = { x: 0, y: 0 }
+  const activate = (image: HTMLDivElement, x: number, y: number) => {
+    if (!containerRef.current) return;
 
-  const activate = (image: HTMLImageElement, x: number, y: number) => {
-    if (!containerRef.current) return
+    const containerRect = containerRef.current.getBoundingClientRect();
+    const relativeX = x - containerRect.left;
+    const relativeY = y - containerRect.top;
 
-    const containerRect = containerRef.current.getBoundingClientRect()
-    const relativeX = x - containerRect.left
-    const relativeY = y - containerRect.top
-
-    image.style.left = `${relativeX}px`
-    image.style.top = `${relativeY}px`
+    image.style.left = `${relativeX}px`;
+    image.style.top = `${relativeY}px`;
 
     if (currentZIndexRef.current > 40) {
-      currentZIndexRef.current = 1
+      currentZIndexRef.current = 1;
     }
 
-    image.style.zIndex = String(currentZIndexRef.current)
-    currentZIndexRef.current++
+    image.style.zIndex = String(currentZIndexRef.current);
+    currentZIndexRef.current++;
 
-    image.dataset.status = "active"
+    image.dataset.status = "active";
 
     if (fadeAnimation) {
       setTimeout(() => {
-        image.dataset.status = "inactive"
-      }, 1500)
+        image.dataset.status = "inactive";
+      }, 1500);
     }
 
-    last = { x, y }
-  }
+    lastRef.current = { x, y };
+  };
 
-  const deactivate = (image: HTMLImageElement) => {
-    image.dataset.status = "inactive"
-  }
+  const deactivate = (image: HTMLDivElement) => {
+    image.dataset.status = "inactive";
+  };
 
   const distanceFromLast = (x: number, y: number) => {
-    return Math.hypot(x - last.x, y - last.y)
-  }
-
-  const handleOnMove = (e: React.MouseEvent | React.Touch) => {
-    if (distanceFromLast(e.clientX, e.clientY) > window.innerWidth / distance) {
-      const lead = refs.current[globalIndex % refs.current.length].current
-      const tail =
-        refs.current[(globalIndex - maxNumberOfImages) % refs.current.length]?.current
-
-      if (lead) activate(lead, e.clientX, e.clientY)
-      if (tail) deactivate(tail)
-
-      globalIndex++
+    return Math.hypot(x - lastRef.current.x, y - lastRef.current.y);
+  };
+  const handleOnMove = (e: React.MouseEvent) => {
+    const clientX = e.clientX;
+    const clientY = e.clientY;
+  
+    if (distanceFromLast(clientX, clientY) > window.innerWidth / distance) {
+      const lead =
+        refs.current[globalIndexRef.current % refs.current.length].current;
+  
+      const tailIndex =
+        (globalIndexRef.current - maxNumberOfImages + refs.current.length) %
+        refs.current.length;
+      const tail = refs.current[tailIndex]?.current;
+  
+      if (lead) activate(lead, clientX, clientY);
+      if (tail) deactivate(tail);
+  
+      globalIndexRef.current++;
     }
-  }
+  };
+  
 
   return (
     <section
-      onMouseMove={(e) => handleOnMove(e)}
-      onTouchMove={(e) => handleOnMove(e.touches[0])}
-      ref={containerRef}
-      className={cn(
-        "relative grid h-[600px] w-full place-content-center overflow-hidden rounded-lg",
-        className
-      )}
-    >
-      {items.map((item, index) => (
+    onMouseMove={handleOnMove}
+    ref={containerRef}
+    className={cn(
+      "relative grid h-[600px] w-full place-content-center overflow-hidden rounded-lg",
+      className
+    )}
+  >
+    {items.map((item, index) => (
+      <div
+        key={index}
+        ref={refs.current[index]}
+        data-status="inactive"
+        className={cn(
+          "absolute -translate-x-1/2 -translate-y-1/2 scale-0 rounded-3xl overflow-hidden transition-transform duration-300 opacity-0 data-[status='active']:scale-100 data-[status='active']:opacity-100 data-[status='active']:duration-500",
+          imgClass
+        )}
+      >
         <img
-          key={index}
-          className={cn(
-            "opacity:0 data-[status='active']:ease-out-expo absolute -translate-x-[50%] -translate-y-[50%] scale-0 rounded-3xl object-cover transition-transform duration-300 data-[status='active']:scale-100 data-[status='active']:opacity-100 data-[status='active']:duration-500",
-            imgClass
-          )}
-          data-index={index}
-          data-status="inactive"
           src={item}
           alt={`image-${index}`}
-          ref={refs.current[index]}
+          className="object-cover w-full h-full"
         />
-      ))}
+      </div>
+    ))}
 
-      {children}
-    </section>
-  )
+    {children}
+  </section>
+  );
 }

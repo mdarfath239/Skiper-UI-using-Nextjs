@@ -1,4 +1,5 @@
 import { ArrowRight, Globe } from 'lucide-react';
+import Image from 'next/image';
 
 export default function Hero() {
   return (
@@ -10,10 +11,11 @@ export default function Hero() {
         target="_blank"
         rel="noopener noreferrer"
       >
-        <img
+        <Image
           src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=806890&amp;theme=light"
           alt="skiper/ui - Components crafted for modern websites | Product Hunt"
-          className="w-[180px] h-[54px]"
+          width={180}
+          height={54}
         />
       </a>
 
